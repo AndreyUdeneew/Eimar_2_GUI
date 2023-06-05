@@ -1,6 +1,6 @@
 # version:1.0.1905.9051
 import gxipy as gx
-from PIL import Image as img
+from PIL import Image as img,ImageFont, ImageDraw
 import cv2
 import io
 import time
@@ -80,12 +80,29 @@ def main():
     # acquire image: num is the image number
     num = 10
     # for i in range(num):
+
+    start_point = ((720)-6, (540)-6)
+    end_point = ((720)+6, (540)+6)
+    color = 255
+    thickness = 1
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    bottomLeftCornerOfText = (10, 50)
+    fontScale = 2
+    fontColor = (255, 255, 255)
+    thickness = 2
+    lineType = 2
+
+
+
     while (True):
         # get raw image
         raw_image1 = cam.data_stream[0].get_image()
         frame1 = raw_image1.get_numpy_array()
+        cursor1 = np.sum(frame1[(540-5):(540+5), (720-5):(720+5)])
         raw_image2 = cam.data_stream[0].get_image()
         frame2 = raw_image2.get_numpy_array()
+        cursor2 = np.sum(frame2[(540 - 5):(540 + 5), (720 - 5):(720 + 5)])
         # if raw_image is None:
         #     print("Getting image failed.")
         #     continue
@@ -100,8 +117,10 @@ def main():
         #
         if sum1 > sum2:
             difframe = frame1 - frame2
+            FI = cursor1/cursor2
         else:
             difframe = frame2 - frame1
+            FI = cursor2 / cursor1
 
         # show acquired image
         pillow_im = img.fromarray(difframe, 'L')
@@ -119,6 +138,14 @@ def main():
             str_date_time = date_time.strftime("%Y-%m-%d_%H_%M_%S")
             filename = text1.get("1.0", 'end-1c') + '/' + str_date_time + ".png"
             print(filename)
+            cv2.rectangle(cv_im, start_point, end_point, color, thickness)
+            cv2.putText(cv_im, str(FI)[0:4],
+                        bottomLeftCornerOfText,
+                        font,
+                        fontScale,
+                        fontColor,
+                        thickness,
+                        lineType)
             cv2.imwrite(filename, cv_im)
             continue
 
@@ -126,13 +153,25 @@ def main():
             break
 
 
+
+        # Using cv2.rectangle() method
+        # Draw a rectangle with blue line borders of thickness of 2 px
+        cv2.rectangle(cv_im, start_point, end_point, color, thickness)
+        cv2.putText(cv_im, str(FI)[0:4],
+                    bottomLeftCornerOfText,
+                    font,
+                    fontScale,
+                    fontColor,
+                    thickness,
+                    lineType)
         cv2.imshow('Preview', cv_im)
         # img.show()
 
         # print height, width, and frame ID of the acquisition image
         # print("Frame ID: %d   Height: %d   Width: %d"
         #       % (raw_image1.get_frame_id(), raw_image1.get_height(), raw_image1.get_width()))
-        print(raw_image1.get_frame_id())
+        print("Frame #: %d   FI: %d"
+              % (raw_image1.get_frame_id(), FI))
 
     # stop data acquisition
     cam.stream_off()
