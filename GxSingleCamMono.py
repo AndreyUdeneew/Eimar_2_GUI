@@ -72,7 +72,7 @@ def main():
     cam.ExposureTime.set(40000)
 
     # set gain
-    cam.Gain.set(24.0)
+    cam.Gain.set(5.0)
 
     # start data acquisition
     cam.stream_on()
@@ -81,8 +81,18 @@ def main():
     num = 10
     # for i in range(num):
 
-    start_point = ((720)-6, (540)-6)
-    end_point = ((720)+6, (540)+6)
+    cursorWidth = 5
+    ROIwidth = 100
+    ROIwidthHalf = int(20/2)
+    frameWidth = 1440
+    frameHalfWidth = int(frameWidth/2)
+    frameHeight = 1080
+    frameHalfHeight = int(frameHeight/2)
+    print (frameHalfWidth)
+    print(frameHalfHeight)
+
+    start_point = ((frameHalfWidth)-(cursorWidth+1), (frameHalfWidth)-(cursorWidth+1))
+    end_point = ((frameHalfWidth)+(cursorWidth+1), (frameHalfWidth)+(cursorWidth+1))
     color = 255
     thickness = 1
 
@@ -99,10 +109,10 @@ def main():
         # get raw image
         raw_image1 = cam.data_stream[0].get_image()
         frame1 = raw_image1.get_numpy_array()
-        cursor1 = np.sum(frame1[(540-5):(540+5), (720-5):(720+5)])
+        cursor1 = np.sum(frame1[(frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth), (frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth)])
         raw_image2 = cam.data_stream[0].get_image()
         frame2 = raw_image2.get_numpy_array()
-        cursor2 = np.sum(frame2[(540 - 5):(540 + 5), (720 - 5):(720 + 5)])
+        cursor2 = np.sum(frame2[(frameHalfWidth - cursorWidth):(frameHalfWidth + cursorWidth), (frameHalfWidth - cursorWidth):(frameHalfWidth + cursorWidth)])
         # if raw_image is None:
         #     print("Getting image failed.")
         #     continue
@@ -112,14 +122,19 @@ def main():
         # if numpy_image is None:
         #     continue
 
-        sum1 = sum_gt_nb(frame1[1:100])
-        sum2 = sum_gt_nb(frame1[1:100])
+        # sum1 = sum_gt_nb(frame1[1:100])
+        # sum2 = sum_gt_nb(frame2[1:100])
+
+        sum1 = np.sum(frame1[(frameHalfWidth-ROIwidthHalf):(frameHalfWidth+ROIwidthHalf), (frameHalfWidth-ROIwidthHalf):(frameHalfWidth+ROIwidthHalf)])
+        sum2 = np.sum(frame2[(frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf), (frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf)])
         #
         if sum1 > sum2:
-            difframe = frame1 - frame2
+            # difframe = frame1 - frame2
+            difframe = cv2.subtract(np.uint8(frame1), np.uint8(frame2))
             FI = cursor1/cursor2
         else:
-            difframe = frame2 - frame1
+            # difframe = frame2 - frame1
+            difframe = cv2.subtract(np.uint8(frame2), np.uint8(frame1))
             FI = cursor2 / cursor1
 
         # show acquired image
