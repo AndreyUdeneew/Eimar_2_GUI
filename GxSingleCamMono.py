@@ -72,7 +72,8 @@ def main():
     cam.ExposureTime.set(40000)
 
     # set gain
-    cam.Gain.set(5.0)
+    gain = 5.0
+    cam.Gain.set(gain)
 
     # start data acquisition
     cam.stream_on()
@@ -102,6 +103,7 @@ def main():
     fontColor = (255, 255, 255)
     thickness = 2
     lineType = 2
+    FI_norm = 1
 
 
 
@@ -131,43 +133,22 @@ def main():
         if sum1 > sum2:
             # difframe = frame1 - frame2
             difframe = cv2.subtract(np.uint8(frame1), np.uint8(frame2))
-            FI = cursor1/cursor2
+            FI_real = cursor1 / cursor2
+            if FI_real < 0:
+                FI_real *= -1
+            FI = FI_real / FI_norm
         else:
             # difframe = frame2 - frame1
             difframe = cv2.subtract(np.uint8(frame2), np.uint8(frame1))
-            FI = cursor2 / cursor1
+            FI_real = cursor2 / cursor1
+            if FI_real < 0:
+                FI_real *= -1
+            FI = FI_real / FI_norm
 
         # show acquired image
         pillow_im = img.fromarray(difframe, 'L')
         cv_im = np.array(pillow_im)
         plt.cla()
-
-
-        if cv2.waitKey(1) & 0xFF == ord('s'):
-            import datetime
-            ct = datetime.datetime.now()
-            ts = ct.timestamp()
-            print("timestamp:-", ts)
-            from datetime import datetime
-            date_time = datetime.fromtimestamp(ts)
-            str_date_time = date_time.strftime("%Y-%m-%d_%H_%M_%S")
-            filename = text1.get("1.0", 'end-1c') + '/' + str_date_time + ".png"
-            print(filename)
-            cv2.rectangle(cv_im, start_point, end_point, color, thickness)
-            cv2.putText(cv_im, str(FI)[0:4],
-                        bottomLeftCornerOfText,
-                        font,
-                        fontScale,
-                        fontColor,
-                        thickness,
-                        lineType)
-            cv2.imwrite(filename, cv_im)
-            continue
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-
 
         # Using cv2.rectangle() method
         # Draw a rectangle with blue line borders of thickness of 2 px
@@ -187,12 +168,51 @@ def main():
         #       % (raw_image1.get_frame_id(), raw_image1.get_height(), raw_image1.get_width()))
         print("Frame #: %d   FI: %d"
               % (raw_image1.get_frame_id(), FI))
-
+        keyPressed = cv2.waitKey(1)
+        if keyPressed & 0xFF == ord('s'):
+            import datetime
+            ct = datetime.datetime.now()
+            ts = ct.timestamp()
+            print("timestamp:-", ts)
+            from datetime import datetime
+            date_time = datetime.fromtimestamp(ts)
+            str_date_time = date_time.strftime("%Y-%m-%d_%H_%M_%S")
+            filename = text1.get("1.0", 'end-1c') + '/' + str_date_time + ".png"
+            print(filename)
+            cv2.rectangle(cv_im, start_point, end_point, color, thickness)
+            cv2.putText(cv_im, str(FI)[0:4],
+                        bottomLeftCornerOfText,
+                        font,
+                        fontScale,
+                        fontColor,
+                        thickness,
+                        lineType)
+            cv2.imwrite(filename, cv_im)
+            # continue
+        elif keyPressed & 0xFF == ord('+'):
+            gain += 1
+            cam.Gain.set(gain)
+            print('+ was pressed')
+            # continue
+        elif keyPressed & 0xFF == ord('-'):
+            gain -= 1
+            cam.Gain.set(gain)
+            print('- was pressed')
+            # continue
+        elif keyPressed & 0xFF == ord('n'):
+            FI_norm = FI
+            print('n was pressed')
+            # continue
+        elif keyPressed & 0xFF == ord('q'):
+            break
+        continue
     # stop data acquisition
     cam.stream_off()
 
     # close device
     cam.close_device()
+
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     window = Tk()
