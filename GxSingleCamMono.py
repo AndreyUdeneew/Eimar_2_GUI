@@ -92,13 +92,14 @@ def main():
     print (frameHalfWidth)
     print(frameHalfHeight)
 
-    start_point = ((frameHalfWidth)-(cursorWidth+1), (frameHalfWidth)-(cursorWidth+1))
-    end_point = ((frameHalfWidth)+(cursorWidth+1), (frameHalfWidth)+(cursorWidth+1))
+    start_point = ((frameHalfWidth)-(cursorWidth+1), (frameHalfHeight)-(cursorWidth+1))
+    end_point = ((frameHalfWidth)+(cursorWidth+1), (frameHalfHeight)+(cursorWidth+1))
     color = 255
     thickness = 1
 
     font = cv2.FONT_HERSHEY_SIMPLEX
-    bottomLeftCornerOfText = (10, 50)
+    FI_position = (10, 50)
+    gainPosition = (10, 100)
     fontScale = 2
     fontColor = (255, 255, 255)
     thickness = 2
@@ -111,10 +112,10 @@ def main():
         # get raw image
         raw_image1 = cam.data_stream[0].get_image()
         frame1 = raw_image1.get_numpy_array()
-        cursor1 = np.sum(frame1[(frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth), (frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth)])
+        cursor1 = np.sum(frame1[(frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth), (frameHalfHeight-cursorWidth):(frameHalfHeight+cursorWidth)])
         raw_image2 = cam.data_stream[0].get_image()
         frame2 = raw_image2.get_numpy_array()
-        cursor2 = np.sum(frame2[(frameHalfWidth - cursorWidth):(frameHalfWidth + cursorWidth), (frameHalfWidth - cursorWidth):(frameHalfWidth + cursorWidth)])
+        cursor2 = np.sum(frame2[(frameHalfWidth - cursorWidth):(frameHalfWidth + cursorWidth), (frameHalfHeight - cursorWidth):(frameHalfHeight + cursorWidth)])
         # if raw_image is None:
         #     print("Getting image failed.")
         #     continue
@@ -154,7 +155,14 @@ def main():
         # Draw a rectangle with blue line borders of thickness of 2 px
         cv2.rectangle(cv_im, start_point, end_point, color, thickness)
         cv2.putText(cv_im, str(FI)[0:4],
-                    bottomLeftCornerOfText,
+                    FI_position,
+                    font,
+                    fontScale,
+                    fontColor,
+                    thickness,
+                    lineType)
+        cv2.putText(cv_im, str(gain)[0:4],
+                    gainPosition,
                     font,
                     fontScale,
                     fontColor,
@@ -181,7 +189,14 @@ def main():
             print(filename)
             cv2.rectangle(cv_im, start_point, end_point, color, thickness)
             cv2.putText(cv_im, str(FI)[0:4],
-                        bottomLeftCornerOfText,
+                        FI_position,
+                        font,
+                        fontScale,
+                        fontColor,
+                        thickness,
+                        lineType)
+            cv2.putText(cv_im, str(gain)[0:4],
+                        gainPosition,
                         font,
                         fontScale,
                         fontColor,
