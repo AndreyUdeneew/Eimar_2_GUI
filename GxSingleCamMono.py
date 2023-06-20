@@ -83,8 +83,8 @@ def main():
     # for i in range(num):
 
     cursorWidth = 5
-    ROIwidth = 100
-    ROIwidthHalf = int(20/2)
+    ROIwidth = 1000
+    ROIwidthHalf = int(ROIwidth /2)
     frameWidth = 1440
     frameHalfWidth = int(frameWidth/2)
     frameHeight = 1080
@@ -112,10 +112,10 @@ def main():
         # get raw image
         raw_image1 = cam.data_stream[0].get_image()
         frame1 = raw_image1.get_numpy_array()
-        cursor1 = np.sum(frame1[(frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth), (frameHalfHeight-cursorWidth):(frameHalfHeight+cursorWidth)])
+        cursor1 = np.sum(frame1[(frameHalfHeight-cursorWidth):(frameHalfHeight+cursorWidth), (frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth)])
         raw_image2 = cam.data_stream[0].get_image()
         frame2 = raw_image2.get_numpy_array()
-        cursor2 = np.sum(frame2[(frameHalfWidth - cursorWidth):(frameHalfWidth + cursorWidth), (frameHalfHeight - cursorWidth):(frameHalfHeight + cursorWidth)])
+        cursor2 = np.sum(frame2[(frameHalfHeight-cursorWidth):(frameHalfHeight+cursorWidth), (frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth)])
         # if raw_image is None:
         #     print("Getting image failed.")
         #     continue
@@ -128,8 +128,16 @@ def main():
         # sum1 = sum_gt_nb(frame1[1:100])
         # sum2 = sum_gt_nb(frame2[1:100])
 
-        sum1 = np.sum(frame1[(frameHalfWidth-ROIwidthHalf):(frameHalfWidth+ROIwidthHalf), (frameHalfWidth-ROIwidthHalf):(frameHalfWidth+ROIwidthHalf)])
-        sum2 = np.sum(frame2[(frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf), (frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf)])
+        sum1 = np.sum(frame1[(frameHalfHeight-ROIwidthHalf):(frameHalfHeight+ROIwidthHalf), (frameHalfWidth-ROIwidthHalf):(frameHalfWidth+ROIwidthHalf)])
+        sum2 = np.sum(frame2[(frameHalfHeight - ROIwidthHalf):(frameHalfHeight + ROIwidthHalf), (frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf)])
+
+        # frame1[(frameHalfHeight-cursorWidth):(frameHalfHeight+cursorWidth), (frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth)] = 255
+        # frame2[(frameHalfHeight-cursorWidth):(frameHalfHeight+cursorWidth), (frameHalfWidth-cursorWidth):(frameHalfWidth+cursorWidth)] = 0
+        # frame1[(frameHalfHeight - ROIwidthHalf):(frameHalfHeight + ROIwidthHalf),
+        # (frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf)] = 255
+        # frame2[(frameHalfHeight - ROIwidthHalf):(frameHalfHeight + ROIwidthHalf),
+        # (frameHalfWidth - ROIwidthHalf):(frameHalfWidth + ROIwidthHalf)] = 0
+
         #
         if sum1 > sum2:
             # difframe = frame1 - frame2
@@ -231,7 +239,7 @@ def main():
 
 if __name__ == "__main__":
     window = Tk()
-    window.geometry('1350x250')
+    window.geometry('1500x250')
     window.title("imageLinePlotter")
 
     lbl1 = Label(window, text="Press q to stop video")
@@ -239,7 +247,7 @@ if __name__ == "__main__":
     lbl2 = Label(window, text="Press s to save image")
     lbl2.grid(column=8, row=1)
 
-    text1 = Text(width=70, height=1)  # Output DIR
+    text1 = Text(width=120, height=1)  # Output DIR
     text1.grid(column=1, row=0, sticky=W)
 
     # text0.pack()
