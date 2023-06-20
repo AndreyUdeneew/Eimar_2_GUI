@@ -191,7 +191,10 @@ def main():
                     thickness,
                     lineType)
         cv_im = imAdjusteded
-        cv2.imshow('Preview', cv_im)
+        winname = "Preview"
+        cv2.namedWindow(winname)  # Create a named window
+        cv2.moveWindow(winname, 40, 30)  # Move it to (40,30)
+        cv2.imshow(winname, cv_im)
         # img.show()
 
         # print height, width, and frame ID of the acquisition image
