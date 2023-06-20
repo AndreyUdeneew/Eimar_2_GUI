@@ -257,7 +257,12 @@ def main():
 
 if __name__ == "__main__":
     window = Tk()
-    window.geometry('1500x250')
+    # window.geometry('1500x250')
+    width = 1450
+    height = 105
+    x = 0
+    y = 0
+    window.geometry('%dx%d+%d+%d' % (width, height, x, y))
     window.title("Eimar-2 GUI")
 
     lbl1 = Label(window, text="Press q to stop video")
