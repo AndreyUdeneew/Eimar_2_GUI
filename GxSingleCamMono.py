@@ -31,6 +31,19 @@ def selectOutputDir():
     outputDir = filedialog.askdirectory(parent=window)
     text1.insert(INSERT, outputDir)
 
+def imadjust(x, a, b, c = 0, d = 255, gamma=1):
+    # Similar to imadjust in MATLAB.
+    # Converts an image range from [a,b] to [c,d].
+    # The Equation of a line can be used for this transformation:
+    #   y=((d-c)/(b-a))*(x-a)+c
+    # However, it is better to use a more generalized equation:
+    #   y=((x-a)/(b-a))^gamma*(d-c)+c
+    # If gamma is equal to 1, then the line equation is used.
+    # When gamma is not equal to 1, then the transformation is not linear.
+
+    y = (((x - a) / (b - a)) ** gamma) * (d - c) + c
+    return y
+
 # @nb.njit
 def sum_gt_nb(arr):
     arr = arr.ravel()
@@ -157,25 +170,27 @@ def main():
         # show acquired image
         pillow_im = img.fromarray(difframe, 'L')
         cv_im = np.array(pillow_im)
+        imAdjusteded = imadjust(cv_im, np.min(cv_im), np.max(cv_im), 0, 255, 1)
         plt.cla()
 
         # Using cv2.rectangle() method
         # Draw a rectangle with blue line borders of thickness of 2 px
         cv2.rectangle(cv_im, start_point, end_point, color, thickness)
-        cv2.putText(cv_im, str(FI)[0:4],
+        cv2.putText(cv_im, 'FI='+str(FI)[0:4],
                     FI_position,
                     font,
                     fontScale,
                     fontColor,
                     thickness,
                     lineType)
-        cv2.putText(cv_im, str(gain)[0:4],
+        cv2.putText(cv_im, 'Gain='+str(gain)[0:4],
                     gainPosition,
                     font,
                     fontScale,
                     fontColor,
                     thickness,
                     lineType)
+        cv_im = imAdjusteded
         cv2.imshow('Preview', cv_im)
         # img.show()
 
@@ -240,7 +255,7 @@ def main():
 if __name__ == "__main__":
     window = Tk()
     window.geometry('1500x250')
-    window.title("imageLinePlotter")
+    window.title("Eimar-2 GUI")
 
     lbl1 = Label(window, text="Press q to stop video")
     lbl1.grid(column=8, row=0)
