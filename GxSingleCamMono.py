@@ -194,6 +194,10 @@ def main():
         winname = "Preview"
         cv2.namedWindow(winname)  # Create a named window
         cv2.moveWindow(winname, 40, 30)  # Move it to (40,30)
+        plt.imshow(cv_im)
+        plt.title('im')
+        # plt.colorbar()
+        plt.show()
         cv2.imshow(winname, cv_im)
         # img.show()
 
