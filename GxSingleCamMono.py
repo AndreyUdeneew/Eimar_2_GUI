@@ -52,6 +52,19 @@ def sum_gt_nb(arr):
         result += x
     return result
 
+# def cam_init():
+#     device_manager = gx.DeviceManager()
+#     dev_num, dev_info_list = device_manager.update_device_list()
+#     cam = device_manager.open_device_by_index(1)
+#     # set continuous acquisition
+#     cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
+#     cam.ExposureTime.set(40000)
+#     gain = 10.0
+#     cam.Gain.set(gain)
+#     cam.stream_on()
+#     return cam
+
+
 def main():
     # print the demo information
     print("")
@@ -65,7 +78,7 @@ def main():
     # create a device manager
     device_manager = gx.DeviceManager()
     dev_num, dev_info_list = device_manager.update_device_list()
-    if dev_num is 0:
+    if dev_num == 0:
         print("Number of enumerated devices is 0")
         return
 
@@ -80,20 +93,11 @@ def main():
 
     # set continuous acquisition
     cam.TriggerMode.set(gx.GxSwitchEntry.OFF)
-
-    # set exposure
     cam.ExposureTime.set(40000)
-
-    # set gain
-    gain = 5.0
+    gain = 10.0
     cam.Gain.set(gain)
-
-    # start data acquisition
     cam.stream_on()
-
-    # acquire image: num is the image number
-    num = 10
-    # for i in range(num):
+    # cam_init()
 
     cursorWidth = 5
     ROIwidth = 1000
@@ -155,57 +159,72 @@ def main():
         if sum1 > sum2:
             # difframe = frame1 - frame2
             difframe = cv2.subtract(np.uint8(frame1), np.uint8(frame2))
-            FI_real = cursor1 / cursor2
+            try:
+                FI_real = cursor1 / cursor2
+            except:
+                pass
+            # FI_real = cv2.divide(int(cursor1), int(cursor2))
             if FI_real < 0:
                 FI_real *= -1
-            FI = FI_real / FI_norm
+            try:
+                FI = FI_real / FI_norm
+            except:
+                pass
+            # FI = cv2.divide(FI_real, FI_norm)
         else:
             # difframe = frame2 - frame1
             difframe = cv2.subtract(np.uint8(frame2), np.uint8(frame1))
-            FI_real = cursor2 / cursor1
+            try:
+                FI_real = cursor2 / cursor1
+            except:
+                pass
+            # FI_real = cv2.divide(int(cursor2), int(cursor1))
             if FI_real < 0:
                 FI_real *= -1
-            FI = FI_real / FI_norm
+            try:
+                FI = FI_real / FI_norm
+            except:
+                pass
+            # FI = cv2.divide(FI_real, FI_norm)
 
         # show acquired image
         pillow_im = img.fromarray(difframe, 'L')
         cv_im = np.array(pillow_im)
         imAdjusteded = imadjust(cv_im, np.min(cv_im), np.max(cv_im), 0, 255, 1)
         plt.cla()
-
+        # cv_im = imAdjusteded
         # Using cv2.rectangle() method
         # Draw a rectangle with blue line borders of thickness of 2 px
         cv2.rectangle(cv_im, start_point, end_point, color, thickness)
-        cv2.putText(cv_im, 'FI='+str(FI)[0:4],
+        cv2.putText(cv_im, str(FI)[0:4],
                     FI_position,
                     font,
                     fontScale,
                     fontColor,
                     thickness,
                     lineType)
-        cv2.putText(cv_im, 'Gain='+str(gain)[0:4],
+        cv2.putText(cv_im, str(gain)[0:4],
                     gainPosition,
                     font,
                     fontScale,
                     fontColor,
                     thickness,
                     lineType)
-        cv_im = imAdjusteded
+
         winname = "Preview"
         cv2.namedWindow(winname)  # Create a named window
-        cv2.moveWindow(winname, 40, 30)  # Move it to (40,30)
-        plt.imshow(cv_im)
-        plt.title('im')
+        cv2.moveWindow(winname, 450, 0)  # Move it to (40,30)
+        # plt.imshow(cv_im)
+        # plt.title('im')
         # plt.colorbar()
-        plt.show()
+        # plt.show()
         cv2.imshow(winname, cv_im)
         # img.show()
 
         # print height, width, and frame ID of the acquisition image
         # print("Frame ID: %d   Height: %d   Width: %d"
         #       % (raw_image1.get_frame_id(), raw_image1.get_height(), raw_image1.get_width()))
-        print("Frame #: %d   FI: %d"
-              % (raw_image1.get_frame_id(), FI))
+        print("Frame #: %d" % (raw_image1.get_frame_id()))
         keyPressed = cv2.waitKey(1)
         if keyPressed & 0xFF == ord('s'):
             import datetime
