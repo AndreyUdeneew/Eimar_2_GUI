@@ -41,8 +41,30 @@ def imadjust(x, a, b, c = 0, d = 255, gamma=1):
     # If gamma is equal to 1, then the line equation is used.
     # When gamma is not equal to 1, then the transformation is not linear.
 
-    y = (((x - a) / (b - a)) ** gamma) * (d - c) + c
+    # y = (((x - a) / (b - a)) ** gamma) * (d - c) + c
+    # y = cv2.add(x, x)
+    # y = cv2.subtract(x*2, x)
+    # y = cv2.multiply(x, 3)
+    # y = cv2.divide(x, x*0.5)
+    # y = x
+
+    # y=((d-c)/(b-a))*(x-a)+c
+    y = cv2.multiply()
     return y
+
+def adjust_gamma(image):
+    a = np.min(image)
+    b = np.max(image)
+    c = 0
+    d = 255
+    # build a lookup table mapping the pixel values [0, 255] to
+    # their adjusted gamma values
+    # invGamma = 1.0 / gamma
+    # table = np.array([((i / 255.0) ** invGamma) * 255
+    table = np.array([((d-c)/(b-a))*(i-a)+c
+        for i in np.arange(0, 256)]).astype("uint8")
+    # apply gamma correction using the lookup table
+    return cv2.LUT(image, table)
 
 # @nb.njit
 def sum_gt_nb(arr):
@@ -117,12 +139,13 @@ def main():
     font = cv2.FONT_HERSHEY_SIMPLEX
     FI_position = (10, 50)
     gainPosition = (10, 100)
+    coefPosition = (10, 150)
     fontScale = 2
     fontColor = (255, 255, 255)
     thickness = 2
     lineType = 2
     FI_norm = 1
-
+    coef = 1
 
 
     while (True):
@@ -189,10 +212,12 @@ def main():
 
         # show acquired image
         pillow_im = img.fromarray(difframe, 'L')
+        # pillow_im = img.fromarray(frame1,'L')
         cv_im = np.array(pillow_im)
-        imAdjusteded = imadjust(cv_im, np.min(cv_im), np.max(cv_im), 0, 255, 1)
+        # imAdjusted = imadjust(cv_im, np.min(cv_im), np.max(cv_im), 0, 255, 1)
+        # imAdjusted = adjust_gamma(cv_im)
         plt.cla()
-        # cv_im = imAdjusteded
+        cv_im = cv2.multiply(cv_im, coef)
         # Using cv2.rectangle() method
         # Draw a rectangle with blue line borders of thickness of 2 px
         cv2.rectangle(cv_im, start_point, end_point, color, thickness)
@@ -205,6 +230,13 @@ def main():
                     lineType)
         cv2.putText(cv_im, str(gain)[0:4],
                     gainPosition,
+                    font,
+                    fontScale,
+                    fontColor,
+                    thickness,
+                    lineType)
+        cv2.putText(cv_im, str(coef)[0:4],
+                    coefPosition,
                     font,
                     fontScale,
                     fontColor,
@@ -251,6 +283,13 @@ def main():
                         fontColor,
                         thickness,
                         lineType)
+            cv2.putText(cv_im, str(coef)[0:4],
+                        coefPosition,
+                        font,
+                        fontScale,
+                        fontColor,
+                        thickness,
+                        lineType)
             cv2.imwrite(filename, cv_im)
             # continue
         elif keyPressed & 0xFF == ord('+'):
@@ -262,6 +301,14 @@ def main():
             gain -= 1
             cam.Gain.set(gain)
             print('- was pressed')
+            # continue
+        elif keyPressed & 0xFF == ord('9'):
+            coef += 0.25
+            print('coef')
+            # continue
+        elif keyPressed & 0xFF == ord('3'):
+            coef -= 0.25
+            print('coef')
             # continue
         elif keyPressed & 0xFF == ord('n'):
             FI_norm = FI
