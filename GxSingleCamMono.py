@@ -181,7 +181,9 @@ def main():
         #
         if sum1 > sum2:
             # difframe = frame1 - frame2
-            difframe = cv2.subtract(np.uint8(frame1), np.uint8(frame2))
+            # difframe = cv2.subtract(np.uint8(frame1), np.uint8(frame2))
+            difframe = cv2.divide(np.uint8(frame1), np.uint8(frame2))
+            # difframe = frame1 / frame2
             try:
                 FI_real = cursor1 / cursor2
             except:
@@ -196,7 +198,9 @@ def main():
             # FI = cv2.divide(FI_real, FI_norm)
         else:
             # difframe = frame2 - frame1
-            difframe = cv2.subtract(np.uint8(frame2), np.uint8(frame1))
+            # difframe = cv2.subtract(np.uint8(frame2), np.uint8(frame1))
+            difframe = cv2.divide(np.uint8(frame2), np.uint8(frame1))
+            # difframe = frame2 / frame1
             try:
                 FI_real = cursor2 / cursor1
             except:
